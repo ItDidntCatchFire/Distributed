@@ -31,11 +31,12 @@ namespace DistSysACW.Controllers
         public IActionResult Get([FromQuery]int[] integers)
         {
             #region TASK1
-            // TODO: 
-            // sort the integers into ascending order
-            // send the integers back as the api/talkback/sort response
-            
-            throw new NotImplementedException();
+            List<int> numbers = new List<int>(integers);
+
+            numbers.Sort();
+
+            return Ok(numbers);
+
             #endregion
         }
     }
