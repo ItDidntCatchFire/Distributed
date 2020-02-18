@@ -16,7 +16,7 @@ namespace DistSysACW.Controllers
         /// Constructs a TalkBack controller, taking the UserContext through dependency injection
         /// </summary>
         /// <param name="context">DbContext set as a service in Startup.cs and dependency injected</param>
-        public TalkBackController(Models.UserContext context) : base(context) { }
+        public TalkBackController(Data.UserContext context) : base(context) { }
 
 
         [ActionName("Hello")]
