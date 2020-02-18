@@ -52,21 +52,26 @@ namespace DistSysACW.Models
             return user;
         }
 
-        //https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members
-        public static async Task<bool> UserExistsAsync(string apiKey, UserContext context)
-            => GetUserByApiKeyAsync(apiKey, context) == null;
+        public static async Task<bool> UserExistsByUserNameAsync(string userName, UserContext context)
+        {
+            var user = context.Users.FirstOrDefault(a => a.UserName == userName);
+            return user != null;
+        }
 
-        public static async Task<bool> UserExistsAsync(string apiKey, string userName, UserContext context)
+        //https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members
+        public static async Task<bool> UserExistsByApiKeyAsync(string apiKey, UserContext context)
+            => GetUserByApiKeyAsync(apiKey, context) != null;
+
+        public static async Task<bool> UserExistsByApiKeyAsync(string apiKey, string userName, UserContext context)
         {
             var user = context.Users.FirstOrDefault(a => a.ApiKey == apiKey && a.UserName == userName);
 
-            return user == null;
+            return user != null;
         }
 
         public static async Task<User> GetUserByApiKeyAsync(string apiKey, UserContext context)
         {
             var user = context.Users.FirstOrDefault(a => a.ApiKey == apiKey);
-
             return user;
         }
 
