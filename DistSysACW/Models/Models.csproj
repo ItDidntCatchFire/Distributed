@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>DistSysACW.Models</RootNamespace>
+    <AssemblyName>DistSysACW.Models</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

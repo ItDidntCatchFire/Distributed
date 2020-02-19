@@ -14,9 +14,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
+    <ProjectReference Include="..\DataAccess\DatabaseAccess.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="C:&#xD;&#xA;cd $(ProjectDir)/../Data&#xD;&#xA;dotnet ef database drop -f | dotnet ef database update" />
+  </Target>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="cd C:/Users/506141&#xD;&#xA;dir" />
+  </Target>
 
 </Project>

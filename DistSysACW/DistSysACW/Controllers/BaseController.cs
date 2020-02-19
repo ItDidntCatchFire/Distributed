@@ -11,10 +11,10 @@ namespace DistSysACW.Controllers
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
-        protected readonly Data.UserContext _context;
-        public BaseController(Data.UserContext context)
+        protected readonly Data.IUserRepository _UserRepository; 
+        public BaseController(Data.IUserRepository UserRepository)
         {
-            _context = context;
+            _UserRepository = UserRepository;
         }
     }
 }

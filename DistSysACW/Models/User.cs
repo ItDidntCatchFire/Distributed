@@ -2,7 +2,7 @@
 
 namespace DistSysACW.Models
 {
-    public class User
+    public class User : IModel
     {
         #region Task2
         public enum Roles
@@ -20,8 +20,6 @@ namespace DistSysACW.Models
         {
 
         }
-
         #endregion
-
     }
 }
