@@ -19,7 +19,12 @@ namespace DistSysACW
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<Models.UserContext>();
+            services.AddEntityFrameworkSqlServer()
+                .AddDbContext<Data.UserContext>();
+
+            services.AddScoped<Data.IUserRepository, DataAccess.UserRepository>();
+
+            services.AddAuthentication();
 
             services.AddMvc(options => {
                 options.AllowEmptyInputInBodyModelBinding = true;

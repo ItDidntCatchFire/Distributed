@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DistSysACW.Migrations
+namespace DistSysACW.Data.Migrations
 {
     public partial class User : Migration
     {
