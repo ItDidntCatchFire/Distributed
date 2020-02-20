@@ -32,7 +32,7 @@ namespace DistSysACW.Controllers
             var user = _UserRepository.UserExistsByUserNameAsync(userName);
 
             if (String.IsNullOrEmpty(userName))
-                return BadRequest("Oops.Make sure your body contains a string with your username and your Content - Type is Content - Type:application / json");
+                return BadRequest("Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
 
             if (user.Result)
                 //return Forbid("Oops. This username is already in use. Please try again with a new username.");
