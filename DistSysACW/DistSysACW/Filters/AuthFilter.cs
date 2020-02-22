@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DistSysACW.Filters
 {
@@ -16,19 +13,23 @@ namespace DistSysACW.Filters
             try
             {
                 AuthorizeAttribute authAttribute = (AuthorizeAttribute)context.ActionDescriptor.EndpointMetadata.Where(e => e.GetType() == typeof(AuthorizeAttribute)).FirstOrDefault();
-
-                if (authAttribute != null)
-                {
-                    string[] roles = authAttribute.Roles.Split(',');
-                    foreach (string role in roles)
+                if (context.HttpContext.User.Identities.Count() > 0)
+                    if (authAttribute != null)
                     {
-                        if (context.HttpContext.User.IsInRole(role))
+                        string[] roles = authAttribute.Roles.Split(',');
+                        foreach (string role in roles)
                         {
-                            return;
+                            if (context.HttpContext.User.IsInRole(role))
+                            {
+                                return;
+                            } else if (role == nameof(Models.User.Roles.Admin))
+                            {
+                                context.HttpContext.Response.StatusCode = 401;
+                                context.Result = new JsonResult("Unauthorized. Admin access only.");
+                            }
                         }
+                        throw new UnauthorizedAccessException();
                     }
-                    throw new UnauthorizedAccessException();
-                }
             }
             catch
             {
