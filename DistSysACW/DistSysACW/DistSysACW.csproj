@@ -20,11 +20,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="C:&#xD;&#xA;cd $(ProjectDir)/../Data&#xD;&#xA;dotnet ef database drop -f | dotnet ef database update" />
-  </Target>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="cd C:/Users/506141&#xD;&#xA;dir" />
+    <Exec Command="C:&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;cd Data&#xD;&#xA;dotnet ef database drop -f | dotnet ef database update" />
   </Target>
 
 </Project>
