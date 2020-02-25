@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$APPLICATION_CONFIG_DIR$/consoles/db" t="IncludeRecursive" />
+    <e p="$APPLICATION_CONFIG_DIR$/extensions" t="IncludeRecursive" />
+    <e p="$APPLICATION_CONFIG_DIR$/scratches" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.3/system/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_DistSysACW.540264385.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="Data" t="IncludeRecursive">
+        <e p="Data.csproj" t="IncludeRecursive" />
+        <e p="IRepository.cs" t="Include" />
+        <e p="IUserRepository.cs" t="Include" />
+        <e p="Migrations" t="Include">
+          <e p="20200219015217_User.Designer.cs" t="Include" />
+          <e p="20200219015217_User.cs" t="Include" />
+          <e p="UserContextModelSnapshot.cs" t="Include" />
+        </e>
+        <e p="UserContext.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="Data.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="DataAccess" t="IncludeRecursive">
+        <e p="DatabaseAccess.csproj" t="IncludeRecursive" />
+        <e p="UserDatabaseAccess.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="DatabaseAccess.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="DistSysACW" t="IncludeRecursive">
+        <e p="Controllers" t="Include">
+          <e p="BaseController.cs" t="Include" />
+          <e p="TalkbackController.cs" t="Include" />
+          <e p="UserController.cs" t="Include" />
+        </e>
+        <e p="CoreExtensions" t="Include">
+          <e p="RSACryptoExtensions.cs" t="Include" />
+        </e>
+        <e p="DistSysACW.csproj" t="IncludeRecursive" />
+        <e p="Filters" t="Include">
+          <e p="AuthFilter.cs" t="Include" />
+        </e>
+        <e p="Middleware" t="Include">
+          <e p="AuthMiddleware.cs" t="Include" />
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="Startup.cs" t="Include" />
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="mono_crash.mem.9482.1.blob" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="DistSysACW.AssemblyInfo.cs" t="Include" />
+              <e p="DistSysACW.RazorAssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="temp.txt" t="Include" />
+      </e>
+      <e p="DistSysACW.sln" t="IncludeFlat" />
+      <e p="DistSysACWClient" t="IncludeRecursive">
+        <e p="DistSysACWClient.csproj" t="IncludeRecursive" />
+        <e p="Program.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="cURLTests.sh" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="DistSysACWClient.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="runMe.sh" t="Include" />
+        <e p="temp.txt" t="Include" />
+      </e>
+      <e p="Models" t="IncludeRecursive">
+        <e p="IModel.cs" t="Include" />
+        <e p="Models.csproj" t="IncludeRecursive" />
+        <e p="User.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="Models.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>

@@ -21,16 +21,19 @@ if [ $# -eq 0 ]
 	local=1
 
 	cd ../Data
+	export PATH="$PATH:$HOME/.dotnet/tools/" 
 	dotnet build
 	dotnet ef database drop -f 
 	dotnet ef database update
 	cd ../DistSysACW
-	dotnet run --no-build > /dev/null & 
+	dotnet run --no-build > /dev/null &
+	sleep 2
 	PROC_ID=$!
+	printf "process ID: "$PROC_ID"\n"
 	cd ../DistSysACWClient
 fi
 
-clear
+#clear
 set -e
 trap error SIGHUP
 
