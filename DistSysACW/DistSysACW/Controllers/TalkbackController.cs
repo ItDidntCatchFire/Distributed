@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 
 namespace DistSysACW.Controllers
@@ -14,7 +15,7 @@ namespace DistSysACW.Controllers
         public TalkBackController()
         {
 
-        } 
+        }
 
 
         [ActionName("Hello")]
@@ -26,15 +27,21 @@ namespace DistSysACW.Controllers
         }
 
         [ActionName("Sort")]
-        public IActionResult Get([FromQuery]int[] integers)
+        public IActionResult Get([FromQuery]string[] integers)
         {
             #region TASK1
-            List<int> numbers = new List<int>(integers);
+            try
+            {
+                var numbers = new List<int>(Array.ConvertAll(integers, s => int.Parse(s)));
 
-            numbers.Sort();
+                numbers.Sort();
 
-            return Ok(numbers);
-
+                return Ok(numbers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(400, "Bad Request");
+            }
             #endregion
         }
     }

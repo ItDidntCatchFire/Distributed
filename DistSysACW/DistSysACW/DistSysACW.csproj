@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="C:&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;cd Data&#xD;&#xA;dotnet ef database drop -f | dotnet ef database update" />
-  </Target>
-
 </Project>
