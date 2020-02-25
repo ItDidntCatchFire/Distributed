@@ -66,7 +66,7 @@ namespace DistSysACW.DataAccess
 
         public async Task DeleteAsync(string Id)
         {
-            _context.Remove(GetByIdAsync(Id));
+            _context.Remove(await GetByIdAsync(Id));
         }
 
         public async Task UpdateAsync(User type)
