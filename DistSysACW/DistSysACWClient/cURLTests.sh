@@ -2,7 +2,8 @@ host=""
 local=0
 
 
-APIKey=""
+UserOneAPIKey=""
+UserTwoAPIKey=""
 
 if [ $# -eq 0 ]
  then
@@ -141,8 +142,8 @@ printf "\tAdding 'UserOne'\n"
 if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/new -H 'Content-Type: application/json' -d '"UserOne"') == 200 ]]
 then 
 	var=$(<temp.txt)
-	APIKey=$var
-	printf "\t\t APIKEY: $APIKey\n" 
+	UserOneAPIKey=$var
+	printf "\t\t User One APIKEY: $UserOneAPIKey\n" 
 else
     printf "  http code Fail\n"
 	kill -1 $$
@@ -202,7 +203,7 @@ printf "\e[31m\tAdding [SPACE] as username\n\e[m"
 
 printf "Task 7 \n"
 printf "\tDeleting a user unauthorized\n"
-if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserOne -H 'ApiKey: '$APIKey'h') == 401 ]]
+if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserOne -H 'ApiKey: '$UserOneAPIKey'h') == 401 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
@@ -216,7 +217,7 @@ else
 fi;
 
 printf "\tDeleting a non-existant user (UserZero)\n"
-if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserZero -H 'ApiKey: '$APIKey) == 200 ]]
+if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserZero -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "false" != $var ]]
@@ -236,9 +237,10 @@ then
     printf "\tUserTwo failed\n"
     kill -1 $$
 else
-    var=$(<temp.txt)	 
-    printf "\t\t APIKEY: $var\n"
-    if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserTwo -H 'ApiKey: '$var) == 200 ]]
+    var=$(<temp.txt)
+	UserTwoAPIKey=$var
+    printf "\t\t User Two APIKEY: $UserTwoAPIKey\n"
+    if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserTwo -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
     then 
     	var=$(<temp.txt)
     	if [[ "true" != $var ]]
@@ -257,10 +259,14 @@ if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/new -H 'Con
 then
     printf "\tUserTwo failed\n"
     kill -1 $$
+else
+    var=$(<temp.txt)
+    UserTwoAPIKey=$var
+    printf "\t\t User Two APIKEY: $UserTwoAPIKey\n"
 fi;
 
 printf "\tChanging UserTwo to Admin\n"
-if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "Admin"}') == 200 ]]
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "Admin"}') == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "DONE" != $var ]]
@@ -274,7 +280,7 @@ else
 fi;
 
 printf "\tChanging UserTwo to User\n"
-if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "User"}') == 200 ]]
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "User"}') == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "DONE" != $var ]]
@@ -288,7 +294,7 @@ else
 fi;
 
 printf "\tChanging non-existant (UserZero) to User\n"
-if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "User"}') == 400 ]]
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "User"}') == 400 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "NOT DONE: Username does not exist" != $var ]]
@@ -302,7 +308,7 @@ else
 fi;
 
 printf "\tChanging non-existant (UserZero) to Admin\n"
-if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "Admin"}') == 400 ]]
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "Admin"}') == 400 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "NOT DONE: Username does not exist" != $var ]]
@@ -346,7 +352,7 @@ printf "\e[31m\tChanging role to King\n\e[m"
 
 printf "Task 9 \n"
 printf "\tProtected Hello (Admin)\n"
-if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey) == 200 ]]
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "Hello UserOne" != $var ]]
@@ -359,22 +365,22 @@ else
 	kill -1 $$
 fi;
 
-printf "\e[31m\tProtected Hello (User)\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey) == 401 ]]
-# then 
-# 	var=$(<temp.txt)
-#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
-#     then
-#         printf "Failed \n"
-#         kill -1 $$
-#     fi;    
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tProtected Hello (User)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+    if [[ "Hello UserTwo" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
 
 printf "\tProtected Hello unauthorized\n"
-if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$UserOneAPIKey'h') == 401 ]]
 then 
 	var=$(<temp.txt)
     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
@@ -388,7 +394,7 @@ else
 fi;
 
 printf "\tProtected sha1 hello (Admin)\n"
-if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey) == 200 ]]
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
@@ -402,7 +408,7 @@ else
 fi;
 
 printf "\e[31m\tProtected sha1 hello (User)\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey) == 200 ]]
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
 # then 
 # 	var=$(<temp.txt)
 # 	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
@@ -430,6 +436,48 @@ printf "\e[31m\tProtected sha1 hello unauthorized\n\e[m"
 # 	kill -1 $$
 # fi;
 
+printf "\tProtected sha256 hello (Admin)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\e[31m\tProtected sha256 hello (User)\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
+# then 
+# 	var=$(<temp.txt)
+# 	if [[ "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824" != $var ]]
+# 	then
+#         printf "Failed \n"
+# 		kill -1 $$
+#     fi;  
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
+
+
+printf "\e[31m\tProtected sha256 hello unauthorized\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+# then 
+# 	var=$(<temp.txt)
+#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+#     then
+#         printf "Failed \n"
+#         kill -1 $$
+#     fi;    
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
 
 if [[ $local == 1 ]] 
 then
