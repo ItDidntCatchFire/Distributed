@@ -12,7 +12,9 @@ using System.Threading.Tasks;
 namespace DistSysACW.DataAccess
 {
     #region Task13?
+
     // TODO: You may find it useful to add code here for Logging
+
     #endregion
 
     public class UserRepository : IUserRepository
@@ -24,13 +26,14 @@ namespace DistSysACW.DataAccess
             _context = context;
         }
 
-        #region Task3 
+        #region Task3
+
         // TODO: Make methods which allow us to read from/write to the database 
 
         public async Task<User> NewUserAsync(string userName)
         {
             var user = new User()
-            { 
+            {
                 UserName = userName,
                 Role = User.Roles.User
             };
@@ -43,7 +46,7 @@ namespace DistSysACW.DataAccess
         //https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members
         public async Task<bool> UserExistsByApiKeyAsync(string apiKey)
             => await GetByIdAsync(apiKey) != null;
-        
+
         public async Task<bool> UserExistsByApiKeyUserNameAsync(string apiKey, string userName)
         {
             var user = _context.Users.FirstOrDefault(a => a.ApiKey == apiKey && a.UserName == userName);
@@ -78,13 +81,17 @@ namespace DistSysACW.DataAccess
             => await _context.SaveChangesAsync();
 
         public async Task<bool> UserExistsByUserNameAsync(string userName)
+            => await GetByUsernameAsync(userName) != null;
+
+        public async Task<User> GetByUsernameAsync(string userName)
         {
             var user = _context.Users.FirstOrDefault(a => a.UserName == userName);
-            return user != null;
+            return user;
         }
 
         public async Task<int> CountAsync()
             => _context.Users.Count();
+
         #endregion
 
         private bool disposed = false;
@@ -98,6 +105,7 @@ namespace DistSysACW.DataAccess
                     _context.Dispose();
                 }
             }
+
             this.disposed = true;
         }
 

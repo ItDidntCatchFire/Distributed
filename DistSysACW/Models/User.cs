@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DistSysACW.Models
 {
@@ -16,10 +17,7 @@ namespace DistSysACW.Models
         public string UserName { get; set; }
         public Roles Role { get; set; }
 
-        public User()
-        {
-
-        }
+        public User() { }
         #endregion
     }
 }

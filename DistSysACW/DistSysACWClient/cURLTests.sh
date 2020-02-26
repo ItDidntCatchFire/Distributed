@@ -20,9 +20,10 @@ if [ $# -eq 0 ]
 	host="https://localhost:5001/api/"
 	local=1
 
-	cd ../Data
-	export PATH="$PATH:$HOME/.dotnet/tools/" 
+	cd ..
 	dotnet build
+	cd Data
+	export PATH="$PATH:$HOME/.dotnet/tools/" 
 	dotnet ef database drop -f 
 	dotnet ef database update
 	cd ../DistSysACW
@@ -33,7 +34,7 @@ if [ $# -eq 0 ]
 	cd ../DistSysACWClient
 fi
 
-#clear
+clear
 set -e
 trap error SIGHUP
 
@@ -204,8 +205,8 @@ else
 	kill -1 $$
 fi;
 
-printf "\tDeleting a non-existant user\n"
-if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=Freddy -H 'ApiKey: '$APIKey) == 200 ]]
+printf "\tDeleting a non-existant user (UserZero)\n"
+if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserZero -H 'ApiKey: '$APIKey) == 200 ]]
 then 
 	var=$(<temp.txt)
 	if [[ "false" != $var ]]
@@ -219,11 +220,41 @@ else
 fi;
 
 
-printf "\tDeleting a user Authorized\n"
-if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserOne -H 'ApiKey: '$APIKey) == 200 ]]
+printf "\tDeleting a user Authorized (User)\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/new -H 'Content-Type: application/json' -d '"UserTwo"') != 200 ]]
+then
+    printf "\tUserTwo failed\n"
+    kill -1 $$
+else
+    var=$(<temp.txt)	 
+    printf "\t\t APIKEY: $var\n"
+    if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserTwo -H 'ApiKey: '$var) == 200 ]]
+    then 
+    	var=$(<temp.txt)
+    	if [[ "true" != $var ]]
+    	then
+            printf "Failed \n"
+    		kill -1 $$
+        fi;  
+    else
+        printf "  http code Fail\n"
+    	kill -1 $$
+    fi;
+fi;
+
+printf "Task 8 \n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/new -H 'Content-Type: application/json' -d '"UserTwo"') != 200 ]]
+then
+    printf "\tUserTwo failed\n"
+    kill -1 $$
+fi;
+
+
+printf "\tChanging UserTwo to Admin\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "Admin"}') == 200 ]]
 then 
 	var=$(<temp.txt)
-	if [[ "true" != $var ]]
+	if [[ "DONE" != $var ]]
 	then
         printf "Failed \n"
 		kill -1 $$
@@ -233,6 +264,75 @@ else
 	kill -1 $$
 fi;
 
+printf "\tChanging UserTwo to User\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "User"}') == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "DONE" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tChanging non-existant (UserZero) to User\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "User"}') == 400 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "NOT DONE: Username does not exist" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tChanging non-existant (UserZero) to Admin\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "Admin"}') == 400 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "NOT DONE: Username does not exist" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\e[31m\tChanging role non JSON\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d 'HELLO') == 400 ]]
+# then 
+# 	var=$(<temp.txt)
+# 	if [[ "NOT DONE: An error occured" != $var ]]
+# 	then
+#         printf "Failed \n"
+# 		kill -1 $$
+#     fi;  
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
+
+printf "\e[31m\tChanging role to King\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "King"}') == 400 ]]
+# then 
+# 	var=$(<temp.txt)
+# 	if [[ "NOT DONE: Role does not exist" != $var ]]
+# 	then
+#         printf "Failed \n"
+# 		kill -1 $$
+#     fi;  
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
 
 
 if [[ $local == 1 ]] 
