@@ -28,8 +28,8 @@ if [ $# -eq 0 ]
 	dotnet ef database update
 	cd ../DistSysACW
 	dotnet run --no-build > /dev/null &
-	sleep 2
 	PROC_ID=$!
+	sleep 2
 	printf "process ID: "$PROC_ID"\n"
 	cd ../DistSysACWClient
 fi
@@ -249,7 +249,6 @@ then
     kill -1 $$
 fi;
 
-
 printf "\tChanging UserTwo to Admin\n"
 if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "Admin"}') == 200 ]]
 then 
@@ -333,6 +332,23 @@ printf "\e[31m\tChanging role to King\n\e[m"
 #     printf "  http code Fail\n"
 # 	kill -1 $$
 # fi;
+
+
+printf "Task 9 \n"
+printf "\tProtected Hello\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "Hello UserOne" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
 
 
 if [[ $local == 1 ]] 

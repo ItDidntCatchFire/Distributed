@@ -41,6 +41,7 @@
       <e p="DistSysACW" t="IncludeRecursive">
         <e p="Controllers" t="Include">
           <e p="BaseController.cs" t="Include" />
+          <e p="ProtectedController.cs" t="Include" />
           <e p="TalkbackController.cs" t="Include" />
           <e p="UserController.cs" t="Include" />
         </e>
