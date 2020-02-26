@@ -9,12 +9,31 @@ namespace DistSysACW.Controllers
 {
     public class UserController : BaseController
     {
+        private readonly Data.IUserRepository _userRepository;
+        
         /// <summary>
         /// Constructs a User controller, taking the UserContext through dependency injection
         /// </summary>
-        /// <param name="context">DbContext set as a service in Startup.cs and dependency injected</param>
-        public UserController(Data.IUserRepository userRepository) : base(userRepository)
+        /// <param name="userRepository">IUserRepository set as a service in Startup.cs and dependency injected</param>
+        public UserController(Data.IUserRepository userRepository) : base()
         {
+            _userRepository = userRepository;
+        }
+        
+        [HttpGet]
+        [RouteAttribute("/api/Protected/Hello")]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Hello()
+        {
+            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
+            {
+                var user = await _userRepository.GetByIdAsync((apiKey));
+                return Ok("Hello " + user.UserName);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         [HttpGet]
@@ -24,7 +43,7 @@ namespace DistSysACW.Controllers
             if (String.IsNullOrEmpty(userName))
                 return Ok("\"False - User Does Not Exist! Did you mean to do a POST to create a new user?\"");
 
-            if (await _UserRepository.UserExistsByUserNameAsync(userName))
+            if (await _userRepository.UserExistsByUserNameAsync(userName))
                 return Ok("\"True - User Does Exist! Did you mean to do a POST to create a new user?\"");
             else
                 return Ok("\"False - User Does Not Exist! Did you mean to do a POST to create a new user?\"");
@@ -34,7 +53,7 @@ namespace DistSysACW.Controllers
         [ActionName("new")]
         public async Task<IActionResult> AddUserByUserName([FromBody] string userName)
         {
-            var user = _UserRepository.UserExistsByUserNameAsync(userName);
+            var user = _userRepository.UserExistsByUserNameAsync(userName);
 
             if (String.IsNullOrEmpty(userName))
                 return BadRequest(
@@ -45,14 +64,14 @@ namespace DistSysACW.Controllers
                 return StatusCode(403,
                     "\"Oops. This username is already in use. Please try again with a new username.\"");
 
-            var newUser = await _UserRepository.NewUserAsync(userName);
-            await _UserRepository.SaveAsync();
-            if (await _UserRepository.CountAsync() == 1)
+            var newUser = await _userRepository.NewUserAsync(userName);
+            await _userRepository.SaveAsync();
+            if (await _userRepository.CountAsync() == 1)
             {
                 newUser.Role = Models.User.Roles.Admin;
-                await _UserRepository.UpdateAsync(newUser);
+                await _userRepository.UpdateAsync(newUser);
 
-                _ = _UserRepository.SaveAsync();
+                _ = _userRepository.SaveAsync();
             }
 
             return Ok(newUser.ApiKey);
@@ -65,11 +84,11 @@ namespace DistSysACW.Controllers
         {
             if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
             {
-                if (await _UserRepository.UserExistsByApiKeyUserNameAsync(apiKey, userName))
+                if (await _userRepository.UserExistsByApiKeyUserNameAsync(apiKey, userName))
                 {
-                    await _UserRepository.DeleteAsync(apiKey);
+                    await _userRepository.DeleteAsync(apiKey);
 
-                    _ = _UserRepository.SaveAsync();
+                    _ = _userRepository.SaveAsync();
                     return Ok(true);
                 }
             }
@@ -84,14 +103,14 @@ namespace DistSysACW.Controllers
         {
             try
             {
-                var tUser = _UserRepository.GetByUsernameAsync(user.UserName);
+                var tUser = _userRepository.GetByUsernameAsync(user.UserName);
 
-                if (!await _UserRepository.UserExistsByUserNameAsync(user.UserName))
+                if (!await _userRepository.UserExistsByUserNameAsync(user.UserName))
                     return BadRequest("NOT DONE: Username does not exist");
 
                 //validate role
                 
-                _ = _UserRepository.UpdateAsync(
+                _ = _userRepository.UpdateAsync(
                     new User()
                     {
                         ApiKey = tUser.Result.ApiKey,
