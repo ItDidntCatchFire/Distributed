@@ -190,8 +190,18 @@ else
 	kill -1 $$
 fi;
 
+printf "\e[31m\tAdding [SPACE] as username\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/new -H 'Content-Type: application/json' -d ' ') == 200 ]]
+# then 
+# 	var=$(<temp.txt)
+#     printf "\t\t APIKEY: $var\n" 
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
+
 printf "Task 7 \n"
-printf "\tDeleting a user UnAuthorised\n"
+printf "\tDeleting a user unauthorized\n"
 if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserOne -H 'ApiKey: '$APIKey'h') == 401 ]]
 then 
 	var=$(<temp.txt)
@@ -335,7 +345,7 @@ printf "\e[31m\tChanging role to King\n\e[m"
 
 
 printf "Task 9 \n"
-printf "\tProtected Hello\n"
+printf "\tProtected Hello (Admin)\n"
 if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey) == 200 ]]
 then 
 	var=$(<temp.txt)
@@ -349,6 +359,76 @@ else
 	kill -1 $$
 fi;
 
+printf "\e[31m\tProtected Hello (User)\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey) == 401 ]]
+# then 
+# 	var=$(<temp.txt)
+#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+#     then
+#         printf "Failed \n"
+#         kill -1 $$
+#     fi;    
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
+
+printf "\tProtected Hello unauthorized\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+then 
+	var=$(<temp.txt)
+    if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tProtected sha1 hello (Admin)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\e[31m\tProtected sha1 hello (User)\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey) == 200 ]]
+# then 
+# 	var=$(<temp.txt)
+# 	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
+# 	then
+#         printf "Failed \n"
+# 		kill -1 $$
+#     fi;  
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
+
+
+printf "\e[31m\tProtected sha1 hello unauthorized\n\e[m"
+# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+# then 
+# 	var=$(<temp.txt)
+#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+#     then
+#         printf "Failed \n"
+#         kill -1 $$
+#     fi;    
+# else
+#     printf "  http code Fail\n"
+# 	kill -1 $$
+# fi;
 
 
 if [[ $local == 1 ]] 
@@ -357,3 +437,5 @@ then
 else
 	./$(basename $0) 1 && exit
 fi
+
+#$(curl -k -i -X OPTIONS http://distsysacw.azurewebsites.net/8285836/Api/protected/hello -H 'ApiKey: 1414aab0-fb56-4371-9686-6bd74238524d')

@@ -22,6 +22,7 @@ namespace DistSysACW.Controllers
         
         [HttpGet]
         [RouteAttribute("/api/Protected/Hello")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Hello()
         {
             if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
