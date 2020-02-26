@@ -38,7 +38,7 @@ namespace DistSysACW.Controllers
 
                 return Ok(numbers);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(400, "Bad Request");
             }

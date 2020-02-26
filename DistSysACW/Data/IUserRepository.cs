@@ -12,6 +12,8 @@ namespace DistSysACW.Data
 
         Task<bool> UserExistsByApiKeyUserNameAsync(string apiKey, string userName);
 
+        Task<Models.User> GetByUsernameAsync(string userName);
+        
         Task<int> CountAsync();
     }
 }
