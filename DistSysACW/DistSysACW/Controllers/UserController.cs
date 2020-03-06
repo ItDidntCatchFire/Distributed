@@ -20,8 +20,9 @@ namespace DistSysACW.Controllers
             _userRepository = userRepository;
         }
         
+        [RouteAttribute("/api/Protected/[Action]")]
         [HttpGet]
-        [RouteAttribute("/api/Protected/Hello")]
+        [ActionName("hello")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Hello()
         {
