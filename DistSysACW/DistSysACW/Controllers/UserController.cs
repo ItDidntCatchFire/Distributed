@@ -20,26 +20,9 @@ namespace DistSysACW.Controllers
             _userRepository = userRepository;
         }
         
-        [RouteAttribute("/api/Protected/[Action]")]
-        [HttpGet]
-        [ActionName("hello")]
-        [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> Hello()
-        {
-            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
-            {
-                var user = await _userRepository.GetByIdAsync((apiKey));
-                return Ok("Hello " + user.UserName);
-            }
-            else
-            {
-                return BadRequest();
-            }
-        }
-
         [HttpGet]
         [ActionName("new")]
-        public async Task<IActionResult> GetUserByUserNameAsync(string userName)
+        public async Task<IActionResult> GetUserByUserNameAsync([FromQuery] string userName)
         {
             if (String.IsNullOrEmpty(userName))
                 return Ok("\"False - User Does Not Exist! Did you mean to do a POST to create a new user?\"");
@@ -126,5 +109,23 @@ namespace DistSysACW.Controllers
                 return BadRequest("NOT DONE: An error occured");
             }
         }
+
+        [RouteAttribute("/api/Protected/[Action]")]
+        [HttpGet]
+        [ActionName("hello")]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Hello()
+        {
+            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
+            {
+                var user = await _userRepository.GetByIdAsync((apiKey));
+                return Ok("Hello " + user.UserName);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
     }
 }
