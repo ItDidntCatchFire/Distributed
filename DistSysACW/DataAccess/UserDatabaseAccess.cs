@@ -74,7 +74,7 @@ namespace DistSysACW.DataAccess
 
         public async Task UpdateAsync(User type)
         {
-            _context.Entry(type).State = EntityState.Modified;
+            _context.Update(type);
         }
 
         public async Task SaveAsync()
@@ -86,6 +86,8 @@ namespace DistSysACW.DataAccess
         public async Task<User> GetByUsernameAsync(string userName)
         {
             var user = _context.Users.FirstOrDefault(a => a.UserName == userName);
+            if (user != null)
+                _context.Entry(user).State = EntityState.Detached;
             return user;
         }
 

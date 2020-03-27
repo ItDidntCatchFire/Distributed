@@ -93,18 +93,20 @@ namespace DistSysACW.Controllers
                     return BadRequest("NOT DONE: Username does not exist");
 
                 //validate role
+
+                var updateUser = new User()
+                {
+                    ApiKey = tUser.Result.ApiKey,
+                    UserName = user.UserName,
+                    Role = user.Role
+                };
+
+                await _userRepository.UpdateAsync(updateUser);
+                _ =  _userRepository.SaveAsync();
                 
-                _ = _userRepository.UpdateAsync(
-                    new User()
-                    {
-                        ApiKey = tUser.Result.ApiKey,
-                        UserName = user.UserName,
-                        Role = user.Role
-                    }
-                );
                 return Ok("DONE");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return BadRequest("NOT DONE: An error occured");
             }

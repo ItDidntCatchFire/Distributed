@@ -4,6 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using DistSysACW.Models;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DistSysACWClient
 {
@@ -34,7 +38,7 @@ namespace DistSysACWClient
         public List<Paramater> Paramaters { get; set; }
 
         public System.Uri Url =>
-            new Uri($"{Domain}/{Route.Replace("[Controller]", Controller).Replace("[Action]", Action)}");
+            new Uri($"{Domain}/{Route.Replace("[Controller]", Controller).Replace("[Action]", Action).TrimStart('/')}");
 
 
         public class Paramater
@@ -48,9 +52,10 @@ namespace DistSysACWClient
     class Client
     {
 
-        private static string userName = "";
-        private static string apiKey = "";
+        private static string userName = "UserOne";
+        private static string apiKey = "5cb07b45-041a-49ac-8920-b9085c25b94f";
         private static string getQuery = "", postQuery = "";
+        private static object postObject;
         private static string retunedData = "";
         private static bool isSuccess = false;
         private static void Main(string[] args)
@@ -127,34 +132,44 @@ namespace DistSysACWClient
         {
             while (input != "Exit")
             {
-                //Make sure there is a space
-                //Are they calling a method in the API?
                 Api api;
-                if (input.Contains(' ') &&
-                    ((api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
-                        .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null)
-                    || ((api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
-                        .FirstOrDefault(x => x.Http.ToUpper().Contains(input.Split(' ')[1].ToUpper()))) != null)
-                        )
+                getQuery = "";
+                postQuery = "";
+                postObject = null;
+                
+                if (input.Contains(' ')) //Check for a space so we don't IndexOutOfRange
                 {
-                    input = input.Replace(input.Split(" ")[0] + " " + input.Split(" ")[1], "").Trim();
+                    if (((api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
+                        || (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                            .FirstOrDefault(x => x.Http.ToUpper().Contains(input.Split(' ')[1].ToUpper()))) != null)
+                        
+                        ||
+                        
+                        (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "SET")
+                        ||
+                        (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "ROLE")
+                        && (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                        .FirstOrDefault(x => x.Action.ToUpper().ToString() == "CHANGEROLE")) != null
+                        ||
+                        (input.Split(' ')[0].ToUpper() == "PROTECTED" && input.Split(' ')[1].ToUpper() == "HELLO")
+                        && (api = apis.Where(x => x.Controller.ToUpper().ToString() == "USER")
+                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
+                        )
+                        
+                    {
+                        //Remove the command
+                         input = input.Replace($"{input.Split(' ')[0]} {input.Split(' ')[1]}", "").Trim();
 
                     try
                     {
-                        //They are calling an API method
-                        Console.WriteLine($"\t{api.Url}");
-                        
-                        foreach (var param in api.Paramaters)
-                        {
-                            Console.WriteLine($"\t{param.Name}");
-                            Console.WriteLine($"\t{param.From}");
-                            Console.WriteLine($"\t{param.Type}");
-
-                            if (param.Type.Contains("[]"))
+                        //If we have been correctly able to reflect the api out
+                        if (api != null)
+                            foreach (var param in api.Paramaters)
                             {
-                                if (param.From == "[Query]")
+                                if (param.Type.Contains("[]") && param.From == "[Query]")
                                 {
-                                    //[1,2,3,4,5] gfdgfdgfd
+                                    //[1,2,3,4,5]
                                     var array = input.Split(' ')[0];
                                     input = input.Replace(array, " ");
 
@@ -162,99 +177,102 @@ namespace DistSysACWClient
                                     {
                                         var fixedItem = item.Replace("[", "").Replace("]", "");
                                         getQuery += param.Name + "=" + fixedItem + "&";
-                                        Console.WriteLine($"\t\t{fixedItem}");
                                     }
                                 }
+                                else if (param.From == "[Body]" && param.Type == "DistSysACW.Models.User")
+                                {
+                                    var uName = input.Split(' ')[0];
+                                    var role = input.Split(' ')[1];
+
+                                    var user = new DistSysACW.Models.User()
+                                    {
+                                        UserName = uName,
+                                        Role = User.Roles.User
+                                    };
+
+                                    //Convert to an object so we can serialize generally
+                                    postObject = user;
+                                }
+                                else
+                                {
+                                    //delete breaks
+                                    var item = input.Split(' ')[0];
+                                    if (param.From == "[Query]" && !String.IsNullOrEmpty(item))
+                                    {
+                                        input = input.Replace(item, " ");
+                                        getQuery += param.Name + "=" + item + "&";
+                                    }
+                                    else if (param.From == "[Body]")
+                                        postQuery = item;
+                                    
+                                    //Convert to an object so we can serialize generally
+                                    postObject = postQuery;
+                                }
                             }
-                            else
+                        else//If we are doing User Set
+                        {
+                            userName = input.Split(' ')[0];
+                            apiKey = input.Split(' ')[1];
+
+                            Console.WriteLine("Stored");
+                        }
+
+                        if (api != null)
+                        {
+                            var client = new HttpClient
                             {
-                                //delete breaks
-                                var item = input.Split(' ')[0];
-                                if (param.From == "[Query]")
-                                {
-                                    input = input.Replace(item, " ");
-                                    getQuery += param.Name + "=" + item + "&";
-                                }
-                                else if (param.From == "[Body]")
-                                {
-                                    postQuery = item;
-                                }
+                                BaseAddress = api.Url
+                            };
+                            client.DefaultRequestHeaders.Add("ApiKey", apiKey);
+
+                            Console.WriteLine("...please wait...");
+                            Task<HttpResponseMessage> result;
+                            switch (api.Http.ToUpper())
+                            {
+                                case "[GET]":
+                                    result = client.GetAsync(api.Url + "?" + getQuery);
+                                    break;
+                                case "[POST]":
+                                    result = client.PostAsJsonAsync("", postObject);
+                                    break;
+                                case "[DELETE]":
+                                    result = client.DeleteAsync($"{api.Url}?{getQuery}{userName}");
+                                    break;
+                                default:
+                                    result = client.GetAsync("");
+                                    Console.WriteLine($"Unknown Type: {api.Http}");
+                                    Console.ReadKey(true);
+                                    Environment.Exit(0);
+                                    break;
                             }
+
+                            var temp = result.Result;
+                            isSuccess = temp.IsSuccessStatusCode;
+                            retunedData = await temp.Content.ReadAsStringAsync();
                         }
-
-
-                        var client = new HttpClient
-                        {
-                            BaseAddress = api.Url
-                        };
-                        client.DefaultRequestHeaders.Add("ApiKey", apiKey);
-
-                        Console.WriteLine($"\t!{api.Http}!");
-
-                        Console.WriteLine("...please wait...");
-                        Task<HttpResponseMessage> result;
-                        switch (api.Http.ToUpper())
-                        {
-                            case "[GET]":
-                                Console.WriteLine($"{api.Url}?{getQuery}");
-                                result = client.GetAsync(api.Url + "?" + getQuery);
-                                break;
-                            case "[POST]":
-                                result = client.PostAsJsonAsync("", postQuery);
-                                break;
-                            case "[DELETE]":
-                                result = client.DeleteAsync($"{api.Url}?{getQuery}{userName}");
-                                break;
-                            default:
-                                result = client.GetAsync("");
-                                Console.WriteLine($"Unknown Type: {api.Http}");
-                                Console.ReadKey(true);
-                                Environment.Exit(0);
-                                break;
-                        }
-                        Console.WriteLine("\tHey");
-
-                        var temp = result.Result;
-                        isSuccess = temp.IsSuccessStatusCode;
-                        retunedData = await temp.Content.ReadAsStringAsync();
-
+                        
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
                         Console.ReadLine();
-                        throw;
                     }
-
-                }
-                else
-                {
-                    if (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "SET")
+                    if (isSuccess && api.Controller == "User" && api.Http == "[Post]" && api.Action == "new")
                     {
-                        input = input.Replace($"{input.Split(' ')[0]} {input.Split(' ')[1]}", "").Trim();
-
-                        userName = input.Split(' ')[0];
-                        apiKey = input.Split(' ')[1];
-
-                        Console.WriteLine("Stored");
+                        userName = postQuery;
+                        apiKey = retunedData;
+                        Console.WriteLine("Got API Key");
+                    } else
+                    {
+                        Console.WriteLine(retunedData);
                     }
-                }
-
-                if (isSuccess && api.Controller == "User" && api.Http == "[Post]")
-                {
-                    userName = postQuery;
-                    apiKey = retunedData;
-                    Console.WriteLine("Got API Key");
-                } else
-                {
-                    Console.WriteLine(retunedData);
+                    }
                 }
 
                 Console.WriteLine("What would you like to do next?");
                 input = Console.ReadLine();
                 Console.Clear();
             }
-            Console.WriteLine("Over Here");
             Environment.Exit(0);
         }
     }
