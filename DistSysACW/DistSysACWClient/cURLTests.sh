@@ -1,3 +1,4 @@
+#!/bin/bash
 host=""
 local=0
 
@@ -7,7 +8,7 @@ UserTwoAPIKey=""
 
 if [ $# -eq 0 ]
  then
-	host="http://distsysacw.azurewebsites.net/8285836/Api/"
+	host="http://distsysacw.azurewebsites.net/8285836/api/"
 		printf "Clearing\n"
 	if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}'other/clear' ) == 200 ]] 
 	 then

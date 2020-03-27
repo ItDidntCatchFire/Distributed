@@ -21,24 +21,8 @@ namespace DistSysACW.Controllers
         }
         
         [HttpGet]
-        [RouteAttribute("/api/Protected/Hello")]
-        [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> Hello()
-        {
-            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
-            {
-                var user = await _userRepository.GetByIdAsync((apiKey));
-                return Ok("Hello " + user.UserName);
-            }
-            else
-            {
-                return BadRequest();
-            }
-        }
-
-        [HttpGet]
         [ActionName("new")]
-        public async Task<IActionResult> GetUserByUserNameAsync(string userName)
+        public async Task<IActionResult> GetUserByUserNameAsync([FromQuery] string userName)
         {
             if (String.IsNullOrEmpty(userName))
                 return Ok("\"False - User Does Not Exist! Did you mean to do a POST to create a new user?\"");
@@ -109,21 +93,41 @@ namespace DistSysACW.Controllers
                     return BadRequest("NOT DONE: Username does not exist");
 
                 //validate role
+
+                var updateUser = new User()
+                {
+                    ApiKey = tUser.Result.ApiKey,
+                    UserName = user.UserName,
+                    Role = user.Role
+                };
+
+                await _userRepository.UpdateAsync(updateUser);
+                _ =  _userRepository.SaveAsync();
                 
-                _ = _userRepository.UpdateAsync(
-                    new User()
-                    {
-                        ApiKey = tUser.Result.ApiKey,
-                        UserName = user.UserName,
-                        Role = user.Role
-                    }
-                );
                 return Ok("DONE");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return BadRequest("NOT DONE: An error occured");
             }
         }
+
+        [RouteAttribute("/api/Protected/[Action]")]
+        [HttpGet]
+        [ActionName("hello")]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Hello()
+        {
+            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
+            {
+                var user = await _userRepository.GetByIdAsync((apiKey));
+                return Ok("Hello " + user.UserName);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
     }
 }

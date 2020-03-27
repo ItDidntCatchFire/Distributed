@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DistSysACW.Controllers
 {
-    [Route("api/[Controller]/[Action]")]
-    [ApiController]
-    public class TalkBackController : ControllerBase
+    public class TalkBackController : BaseController
     {
         /// <summary>
         /// Constructs a TalkBack controller, taking the UserContext through dependency injection
@@ -17,17 +16,18 @@ namespace DistSysACW.Controllers
 
         }
 
-
+        [HttpGet]
         [ActionName("Hello")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             #region TASK1
             return Ok("Hello World");
             #endregion
         }
 
+        [HttpGet]
         [ActionName("Sort")]
-        public IActionResult Get([FromQuery]string[] integers)
+        public async Task<IActionResult> Get([FromQuery]string[] integers)
         {
             #region TASK1
             try
