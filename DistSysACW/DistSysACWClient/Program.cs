@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
+using CoreExtensions;
 using DistSysACW.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -54,8 +57,8 @@ namespace DistSysACWClient
     class Client
     {
 
-        private static string userName = "UserOne";
-        private static string apiKey = "5cb07b45-041a-49ac-8920-b9085c25b94f";
+        private static string userName = "";
+        private static string apiKey = "";
         private static string publicKey = "";
         private static string getQuery = "", postQuery = "";
         private static object postObject;
@@ -248,6 +251,7 @@ namespace DistSysACWClient
                                 retunedData = "You need to do a User Post or User Set first";
                             else
                             {
+                                //If we should need an ApiKey then add it
                                 if (api.Authorized)
                                     client.DefaultRequestHeaders.Add("ApiKey", apiKey);
 
@@ -256,7 +260,7 @@ namespace DistSysACWClient
                                 switch (api.Http.ToUpper())
                                 {
                                     case "[GET]":
-                                        result = client.GetAsync(api.Url + "?" + getQuery);
+                                        result = client.GetAsync(api.Url + "?" + getQuery.TrimEnd('&'));
                                         break;
                                     case "[POST]":
                                         result = client.PostAsJsonAsync("", postObject);
@@ -300,6 +304,28 @@ namespace DistSysACWClient
                             else
                                 Console.WriteLine("Couldn't Get the Public Key");
                         }
+                        else if (isSuccess && api.Controller == "Protected" && api.Http == "[Get]" && api.Action == "Sign")
+                        {
+                            if (publicKey == "")
+                                Console.WriteLine("Client doesn’t yet have the public key");
+                            else
+                            {
+                                //message=Hello&
+                                var message = getQuery.Replace("message=", "").TrimEnd('&');
+                                var byteConverter = new ASCIIEncoding();
+                                var originalData = byteConverter.GetBytes(message);
+                                
+                                var hexReturned = StringToByteArray(retunedData.Replace("-",""));
+                                
+                                var cspAsymmetric = new RSACryptoServiceProvider();
+                                cspAsymmetric.FromXmlStringCore22(publicKey);
+                                var correct = cspAsymmetric.VerifyData(originalData,CryptoConfig.MapNameToOID("SHA1"), hexReturned);
+
+                                Console.WriteLine(correct
+                                    ? "Message was successfully signed"
+                                    : "Message was not successfully signed");
+                            }
+                        }
                         else
                             Console.WriteLine(retunedData);
                 }
@@ -309,6 +335,15 @@ namespace DistSysACWClient
                 Console.Clear();
             }
             Environment.Exit(0);
+        }
+        
+        public static byte[] StringToByteArray(string hex)
+        {
+            var NumberChars = hex.Length;
+            var bytes = new byte[NumberChars / 2];
+            for (var i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
         }
     }
     #endregion
