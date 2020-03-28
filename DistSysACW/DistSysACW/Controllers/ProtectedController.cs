@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,10 +51,23 @@ namespace DistSysACW.Controllers
 
         [HttpGet]
         [ActionName("GetPublicKey")]
-        [Authorize(Roles = "User,Admin")]
+        //[Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetPublicKey()
         {
             return Ok(_cspAsymmetric.ToXmlStringCore22());
+        }
+
+        [HttpGet]
+        [ActionName("Sign")]
+        //[Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Sign([FromQuery]string message)
+        {
+            var byteConverter = new ASCIIEncoding();
+            var originalData = byteConverter.GetBytes(message);
+
+            var result = _cspAsymmetric.SignData(originalData, new SHA1CryptoServiceProvider());
+            
+            return Ok(BitConverter.ToString(result));
         }
     }
 }
