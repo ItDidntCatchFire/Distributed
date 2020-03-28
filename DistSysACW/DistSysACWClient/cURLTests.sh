@@ -408,34 +408,34 @@ else
 	kill -1 $$
 fi;
 
-printf "\e[31m\tProtected sha1 hello (User)\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
-# then 
-# 	var=$(<temp.txt)
-# 	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
-# 	then
-#         printf "Failed \n"
-# 		kill -1 $$
-#     fi;  
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tProtected sha1 hello (User)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
 
 
-printf "\e[31m\tProtected sha1 hello unauthorized\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
-# then 
-# 	var=$(<temp.txt)
-#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
-#     then
-#         printf "Failed \n"
-#         kill -1 $$
-#     fi;    
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tProtected sha1 hello (Unauthorized)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha1?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+then 
+	var=$(<temp.txt)
+    if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
 
 printf "\tProtected sha256 hello (Admin)\n"
 if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
@@ -451,34 +451,64 @@ else
 	kill -1 $$
 fi;
 
-printf "\e[31m\tProtected sha256 hello (User)\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
-# then 
-# 	var=$(<temp.txt)
-# 	if [[ "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824" != $var ]]
-# 	then
-#         printf "Failed \n"
-# 		kill -1 $$
-#     fi;  
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tProtected sha256 hello (User)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
+then 
+	var=$(<temp.txt)
+	if [[ "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824" != $var ]]
+	then
+        printf "Failed \n"
+		kill -1 $$
+    fi;  
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
 
 
-printf "\e[31m\tProtected sha256 hello unauthorized\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
-# then 
-# 	var=$(<temp.txt)
-#     if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
-#     then
-#         printf "Failed \n"
-#         kill -1 $$
-#     fi;    
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tProtected sha256 hello (Unauthorized)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/sha256?message=hello -H 'ApiKey: '$APIKey'h') == 401 ]]
+then 
+	var=$(<temp.txt)
+    if [[ "\"Unauthorized. Check ApiKey in Header is correct."\" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+printf "Task 11 \n"
+printf "\tProtected Get Public Key (Admin)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/getpublickey?message=hello -H 'ApiKey: '$UserOneAPIKey) == 200 ]]
+then 
+    :
+    # No idea what should go here
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tProtected Get Public Key (User)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/getpublickey?message=hello -H 'ApiKey: '$UserTwoAPIKey) == 200 ]]
+then
+    :
+    # No idea what should go here
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tProtected Get Public Key (Unauthorized)\n"
+if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/getpublickey?message=hello -H 'ApiKey: '$UserTwoAPIKey'h') == 401 ]]
+then
+    :
+    # No idea what should go here
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
 
 if [[ $local == 1 ]] 
 then
@@ -486,5 +516,6 @@ then
 else
 	./$(basename $0) 1 && exit
 fi
+
 
 #$(curl -k -i -X OPTIONS http://distsysacw.azurewebsites.net/8285836/Api/protected/hello -H 'ApiKey: 1414aab0-fb56-4371-9686-6bd74238524d')

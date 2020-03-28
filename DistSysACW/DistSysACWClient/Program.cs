@@ -35,6 +35,8 @@ namespace DistSysACWClient
         public string Action { get; set; }
         public string Http { get; set; }
 
+        public bool Authorized { get; set; } = false;
+
         public List<Paramater> Paramaters { get; set; }
 
         public System.Uri Url =>
@@ -54,6 +56,7 @@ namespace DistSysACWClient
 
         private static string userName = "UserOne";
         private static string apiKey = "5cb07b45-041a-49ac-8920-b9085c25b94f";
+        private static string publicKey = "";
         private static string getQuery = "", postQuery = "";
         private static object postObject;
         private static string retunedData = "";
@@ -73,6 +76,7 @@ namespace DistSysACWClient
             const string actionAttribute = "Microsoft.AspNetCore.Mvc.ActionNameAttribute";
             const string httpAttribute = "Microsoft.AspNetCore.Mvc.Http";
             const string fromAttribute = "Microsoft.AspNetCore.Mvc.From";
+            const string authAttribute = "Microsoft.AspNetCore.Authorization.AuthorizeAttribute";
 
             var endpoints = new List<Api>();
             var name = AssemblyName.GetAssemblyName(@".\DistSysACW.dll");
@@ -103,13 +107,17 @@ namespace DistSysACWClient
 
                     //Get the data from the method attributes
                     foreach (var attribute in method.CustomAttributes)
+                    {
                         if (attribute.ToString().Contains(routeAttribute))
                             api.Route = attribute.ConstructorArguments.First().ToString();
                         else if (attribute.ToString().Contains(actionAttribute))
                             api.Action = attribute.ConstructorArguments.First().ToString().Replace("\"", "");
                         else if (attribute.ToString().Contains(httpAttribute))
                             api.Http = attribute.ToString().Replace(httpAttribute, "").Replace("Attribute()", "");
-
+                        else if (attribute.ToString().Contains(authAttribute))
+                            api.Authorized = true;
+                    }
+                    
                     //Do the parameters
                     api.Paramaters = new List<Api.Paramater>();
                     foreach (var parameter in method.GetParameters())
@@ -132,39 +140,59 @@ namespace DistSysACWClient
         {
             while (input != "Exit")
             {
-                Api api;
+                Api api = null;
                 getQuery = "";
                 postQuery = "";
                 postObject = null;
+                retunedData = "";
+                isSuccess = false;
                 
                 if (input.Contains(' ')) //Check for a space so we don't IndexOutOfRange
                 {
-                    if (((api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
-                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
-                        || (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
-                            .FirstOrDefault(x => x.Http.ToUpper().Contains(input.Split(' ')[1].ToUpper()))) != null)
-                        
-                        ||
-                        
-                        (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "SET")
-                        ||
-                        (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "ROLE")
+                    //Lazily set the api whilst checking if it is valid
+                    //This looks messy but works kinda well
+                    //Filter out all of the options that the reflection could not do beforehand then set the api object up
+                    //ToUpper everything as users are bad
+                    
+                    if (//USER ROLE CHANGE
+                        input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "ROLE"
                         && (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
-                        .FirstOrDefault(x => x.Action.ToUpper().ToString() == "CHANGEROLE")) != null
+                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == "CHANGEROLE")) != null
                         ||
-                        (input.Split(' ')[0].ToUpper() == "PROTECTED" && input.Split(' ')[1].ToUpper() == "HELLO")
+                            //PROTECTED HELLO
+                        input.Split(' ')[0].ToUpper() == "PROTECTED" && input.Split(' ')[1].ToUpper() == "HELLO"
                         && (api = apis.Where(x => x.Controller.ToUpper().ToString() == "USER")
                             .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
+                        ||
+                            //PROTECTED GET PUBLIC KEY
+                        (input.Split(' ')[0].ToUpper() == "PROTECTED" && input.Split(' ')[1].ToUpper() == "GET" && input.Split(' ')[2].ToUpper() == "PUBLICKEY")
+                        && (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == "GETPUBLICKEY")) != null
+                        ||
+                            //SEARCH the reflected API
+                        (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                            .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
+                        || (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                            .FirstOrDefault(x => x.Http.ToUpper().Contains(input.Split(' ')[1].ToUpper()))) != null
                         )
-                        
-                    {
-                        //Remove the command
-                         input = input.Replace($"{input.Split(' ')[0]} {input.Split(' ')[1]}", "").Trim();
+                        //Remove the command from the input string
+                        input = input.Replace($"{input.Split(' ')[0]} {input.Split(' ')[1]}", "").Trim();
 
+                    if (input.Split(' ')[0].ToUpper() == "USER" && input.Split(' ')[1].ToUpper() == "SET")
+                    {
+                        if (input.Split(' ').Length == 4)
+                        {
+                            userName = input.Split(' ')[2];
+                            apiKey = input.Split(' ')[3];
+                            Console.WriteLine("Stored");    
+                        }
+                    }
+                    
                     try
                     {
                         //If we have been correctly able to reflect the api out
                         if (api != null)
+                        {
                             foreach (var param in api.Paramaters)
                             {
                                 if (param.Type.Contains("[]") && param.From == "[Query]")
@@ -209,64 +237,71 @@ namespace DistSysACWClient
                                     postObject = postQuery;
                                 }
                             }
-                        else//If we are doing User Set
-                        {
-                            userName = input.Split(' ')[0];
-                            apiKey = input.Split(' ')[1];
-
-                            Console.WriteLine("Stored");
-                        }
-
-                        if (api != null)
-                        {
+                        
                             var client = new HttpClient
                             {
                                 BaseAddress = api.Url
                             };
-                            client.DefaultRequestHeaders.Add("ApiKey", apiKey);
-
-                            Console.WriteLine("...please wait...");
-                            Task<HttpResponseMessage> result;
-                            switch (api.Http.ToUpper())
+                            
+                            //If we should have an apiKey but don't
+                            if (api.Authorized && apiKey == "")
+                                retunedData = "You need to do a User Post or User Set first";
+                            else
                             {
-                                case "[GET]":
-                                    result = client.GetAsync(api.Url + "?" + getQuery);
-                                    break;
-                                case "[POST]":
-                                    result = client.PostAsJsonAsync("", postObject);
-                                    break;
-                                case "[DELETE]":
-                                    result = client.DeleteAsync($"{api.Url}?{getQuery}{userName}");
-                                    break;
-                                default:
-                                    result = client.GetAsync("");
-                                    Console.WriteLine($"Unknown Type: {api.Http}");
-                                    Console.ReadKey(true);
-                                    Environment.Exit(0);
-                                    break;
-                            }
+                                if (api.Authorized)
+                                    client.DefaultRequestHeaders.Add("ApiKey", apiKey);
 
-                            var temp = result.Result;
-                            isSuccess = temp.IsSuccessStatusCode;
-                            retunedData = await temp.Content.ReadAsStringAsync();
+                                Console.WriteLine("...please wait...");
+                                Task<HttpResponseMessage> result;
+                                switch (api.Http.ToUpper())
+                                {
+                                    case "[GET]":
+                                        result = client.GetAsync(api.Url + "?" + getQuery);
+                                        break;
+                                    case "[POST]":
+                                        result = client.PostAsJsonAsync("", postObject);
+                                        break;
+                                    case "[DELETE]":
+                                        result = client.DeleteAsync($"{api.Url}?{getQuery}{userName}");
+                                        break;
+                                    default:
+                                        result = client.GetAsync("");
+                                        Console.WriteLine($"Unknown Type: {api.Http}");
+                                        Console.ReadKey(true);
+                                        Environment.Exit(0);
+                                        break;
+                                }
+
+                                var temp = result.Result;
+                                isSuccess = temp.IsSuccessStatusCode;
+                                retunedData = await temp.Content.ReadAsStringAsync();
+                            }    
                         }
-                        
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
                         Console.ReadLine();
                     }
-                    if (isSuccess && api.Controller == "User" && api.Http == "[Post]" && api.Action == "new")
-                    {
-                        userName = postQuery;
-                        apiKey = retunedData;
-                        Console.WriteLine("Got API Key");
-                    } else
-                    {
-                        Console.WriteLine(retunedData);
-                    }
-                    }
+                    if (api != null)
+                        if (isSuccess && api.Controller == "User" && api.Http == "[Post]" && api.Action == "new")
+                        {
+                            userName = postQuery;
+                            apiKey = retunedData;
+                            Console.WriteLine("Got API Key");
+                        }
+                        else if (api.Controller == "Protected" && api.Http == "[Get]" && api.Action == "GetPublicKey")
+                        {
+                            if (isSuccess)
+                            {
+                                Console.WriteLine("Got Public Key");
+                                publicKey = retunedData;
+                            }
+                            else
+                                Console.WriteLine("Couldn't Get the Public Key");
+                        }
+                        else
+                            Console.WriteLine(retunedData);
                 }
 
                 Console.WriteLine("What would you like to do next?");
@@ -276,6 +311,5 @@ namespace DistSysACWClient
             Environment.Exit(0);
         }
     }
-
     #endregion
 }

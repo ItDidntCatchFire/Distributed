@@ -1,0 +1,4 @@
+Admin is always set
+Also need to check Role on change role
+
+Add a flag to check if we should send header
