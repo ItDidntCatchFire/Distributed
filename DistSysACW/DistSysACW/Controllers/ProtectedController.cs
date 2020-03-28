@@ -5,13 +5,17 @@ using System.Threading.Tasks;
 using DistSysACW.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CoreExtensions;
 
 namespace DistSysACW.Controllers
 {
     public class ProtectedController : BaseController
     {
-        public ProtectedController() : base()
+        private readonly RSACryptoServiceProvider _cspAsymmetric;
+        
+        public ProtectedController(RSACryptoServiceProvider cspAsymmetric) : base()
         {
+            _cspAsymmetric = cspAsymmetric;
         }
 
         [HttpGet]
@@ -42,6 +46,14 @@ namespace DistSysACW.Controllers
             var result = sha.ComputeHash(data);
             
             return Ok(BitConverter.ToString(result).Replace("-", ""));
+        }
+
+        [HttpGet]
+        [ActionName("GetPublicKey")]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> GetPublicKey()
+        {
+            return Ok(_cspAsymmetric.ToXmlStringCore22());
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,10 @@ namespace DistSysACW
                 .AddDbContext<Data.UserContext>();
 
             services.AddScoped<Data.IUserRepository, DataAccess.UserRepository>();
+            
+            var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+            
+            services.AddSingleton(rsaCryptoServiceProvider);
 
             services.AddAuthentication();
 
