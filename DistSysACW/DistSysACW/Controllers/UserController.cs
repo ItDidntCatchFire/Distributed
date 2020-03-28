@@ -125,9 +125,9 @@ namespace DistSysACW.Controllers
             }
             else
             {
+                //This should never be hit as we will have an ApiKey that works
                 return BadRequest();
             }
         }
-
     }
 }
