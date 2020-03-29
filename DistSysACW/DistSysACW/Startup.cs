@@ -25,7 +25,7 @@ namespace DistSysACW
                 .AddDbContext<Data.UserContext>();
 
             services.AddScoped<Data.IUserRepository, DataAccess.UserRepository>();
-            
+
             var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
             
             services.AddSingleton(rsaCryptoServiceProvider);

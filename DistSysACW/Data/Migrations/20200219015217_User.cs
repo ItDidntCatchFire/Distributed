@@ -12,7 +12,7 @@ namespace DistSysACW.Data.Migrations
                 {
                     ApiKey = table.Column<string>(nullable: false),
                     UserName = table.Column<string>(nullable: true),
-                    Role = table.Column<int>(nullable: false)
+                    eRole = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

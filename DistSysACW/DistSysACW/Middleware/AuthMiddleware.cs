@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DistSysACW.Models;
 
 namespace DistSysACW.Middleware
 {
@@ -28,14 +30,22 @@ namespace DistSysACW.Middleware
                     var claims = new List<Claim>()
                     {
                         new Claim(ClaimTypes.Name, user.UserName),
-                        new Claim(ClaimTypes.Role, user.Role.ToString())
+                        new Claim(ClaimTypes.Role, user.eRole.ToString())
                     };
 
-                    ClaimsIdentity cli = new ClaimsIdentity(claims, "ApiKey");
+                    var cli = new ClaimsIdentity(claims, "ApiKey");
                     cli.AddClaims(claims);
 
                     context.User.AddIdentity(cli);
 
+                    //Logging
+                    var request = context.Request.Path;
+                    var log = new Log($"User Requested: {request}");
+                    if (user.Logs == null)
+                        user.Logs = new List<Log>();
+                    user.Logs.Add(log);
+                    await userRepository.UpdateAsync(user);
+                    _ = userRepository.SaveAsync();
                 }
             }
             #endregion

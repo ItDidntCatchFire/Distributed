@@ -10,26 +10,25 @@ namespace DistSysACW.Filters
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            var authAttribute = (AuthorizeAttribute)context.ActionDescriptor.EndpointMetadata.FirstOrDefault(e => e.GetType() == typeof(AuthorizeAttribute));
             try
             {
-                AuthorizeAttribute authAttribute = (AuthorizeAttribute)context.ActionDescriptor.EndpointMetadata.Where(e => e.GetType() == typeof(AuthorizeAttribute)).FirstOrDefault();
-                if (context.HttpContext.User.Identities.Count() > 0)
-                    if (authAttribute != null)
-                    {
-                        string[] roles = authAttribute.Roles.Split(',');
-                        foreach (string role in roles)
-                        {
-                            if (context.HttpContext.User.IsInRole(role))
-                            {
-                                return;
-                            } else if (role == nameof(Models.User.Roles.Admin))
-                            {
-                                context.HttpContext.Response.StatusCode = 401;
-                                context.Result = new JsonResult("Unauthorized. Admin access only.");
-                            }
-                        }
-                        throw new UnauthorizedAccessException();
-                    }
+                if (authAttribute == null) return; //No auth required for method
+                if (!context.HttpContext.User.Identities.Any()) return; //User has no identities
+                
+
+                //if the user is valid
+                var roles = authAttribute.Roles.Split(',');
+                if (roles.Any(role => context.HttpContext.User.IsInRole(role)))
+                    return;
+
+                //if it is not admin access only
+                if (roles.First() != nameof(Models.User.Roles.Admin))
+                    throw new UnauthorizedAccessException();
+                
+                //if it is admin access only
+                context.HttpContext.Response.StatusCode = 401;
+                context.Result = new JsonResult("Unauthorized. Admin access only.");                    
             }
             catch
             {
