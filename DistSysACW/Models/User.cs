@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DistSysACW.Models
@@ -15,8 +18,10 @@ namespace DistSysACW.Models
         [Key]
         public string ApiKey { get; set; }
         public string UserName { get; set; }
-        public Roles Role { get; set; }
+        public Roles eRole { get; set; }
 
+        public virtual ICollection<Models.Log> Logs { get; set; }
+        
         public User() { }
         #endregion
     }

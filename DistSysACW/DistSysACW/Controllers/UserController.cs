@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DistSysACW.Models;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +12,7 @@ namespace DistSysACW.Controllers
     public class UserController : BaseController
     {
         private readonly Data.IUserRepository _userRepository;
-        
+
         /// <summary>
         /// Constructs a User controller, taking the UserContext through dependency injection
         /// </summary>
@@ -52,7 +54,7 @@ namespace DistSysACW.Controllers
             await _userRepository.SaveAsync();
             if (await _userRepository.CountAsync() == 1)
             {
-                newUser.Role = Models.User.Roles.Admin;
+                newUser.eRole = Models.User.Roles.Admin;
                 await _userRepository.UpdateAsync(newUser);
 
                 _ = _userRepository.SaveAsync();
@@ -68,9 +70,10 @@ namespace DistSysACW.Controllers
         {
             if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
             {
-                if (await _userRepository.UserExistsByApiKeyUserNameAsync(apiKey, userName))
+                var user = await _userRepository.GetByUsernameAsync(userName); 
+                if (user != null)
                 {
-                    await _userRepository.DeleteAsync(apiKey);
+                    await _userRepository.DeleteAsync(user);
 
                     _ = _userRepository.SaveAsync();
                     return Ok(true);
@@ -83,26 +86,33 @@ namespace DistSysACW.Controllers
         [HttpPost]
         [ActionName("ChangeRole")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangeRole([FromBody] Models.User user)
+        public async Task<IActionResult> ChangeRole([FromBody] Dictionary<string, string> dic)
         {
             try
             {
-                var tUser = _userRepository.GetByUsernameAsync(user.UserName);
+                if (!dic.TryGetValue("username", out var username) || !dic.TryGetValue("role", out var role))
+                    return BadRequest("NOT DONE: An error occured");
+                
+                var tUser = _userRepository.GetByUsernameAsync(username);
 
-                if (!await _userRepository.UserExistsByUserNameAsync(user.UserName))
+                if (!await _userRepository.UserExistsByUserNameAsync(username))
                     return BadRequest("NOT DONE: Username does not exist");
 
-                //validate role
+                
+                if (!Enum.IsDefined(typeof(Models.User.Roles), role))
+                    return BadRequest("NOT DONE: Role does not exist");
 
+                var user = await tUser;
+                
                 var updateUser = new User()
                 {
-                    ApiKey = tUser.Result.ApiKey,
+                    ApiKey = user.ApiKey,
                     UserName = user.UserName,
-                    Role = user.Role
+                    eRole = (Models.User.Roles)Enum.Parse(typeof(Models.User.Roles), role)
                 };
 
                 await _userRepository.UpdateAsync(updateUser);
-                _ =  _userRepository.SaveAsync();
+                _ = _userRepository.SaveAsync();
                 
                 return Ok("DONE");
             }

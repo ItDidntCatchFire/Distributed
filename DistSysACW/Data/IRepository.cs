@@ -10,7 +10,7 @@ namespace DistSysACW.Data
         Task<IEnumerable<T>> ListAsync();
         Task<T> GetByIdAsync(U Id);
         Task<T> AddAsync(T type);
-        Task DeleteAsync(U Id);
+        Task DeleteAsync(T type);
         Task UpdateAsync(T type);
         Task SaveAsync();
     }

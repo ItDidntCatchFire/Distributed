@@ -35,7 +35,7 @@ namespace DistSysACW.DataAccess
             var user = new User()
             {
                 UserName = userName,
-                Role = User.Roles.User
+                eRole = User.Roles.User
             };
 
             await AddAsync(user);
@@ -67,9 +67,22 @@ namespace DistSysACW.DataAccess
             return type;
         }
 
-        public async Task DeleteAsync(string Id)
+        public async Task DeleteAsync(User type)
         {
-            _context.Remove(await GetByIdAsync(Id));
+            foreach (var log in type.Logs)
+            {
+                var logArchive = new Log_Archives()
+                {
+                    LogId = log.LogId,
+                    LogString = log.LogString,
+                    LogDateTime = log.LogDateTime
+                };
+
+                _context.LogArchives.Add(logArchive);
+                _context.Logs.Remove(log);
+            }
+            
+            _context.Remove(type);
         }
 
         public async Task UpdateAsync(User type)

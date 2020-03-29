@@ -51,7 +51,7 @@ namespace DistSysACW.Controllers
 
         [HttpGet]
         [ActionName("GetPublicKey")]
-        //[Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetPublicKey()
         {
             return Ok(_cspAsymmetric.ToXmlStringCore22());
@@ -59,7 +59,7 @@ namespace DistSysACW.Controllers
 
         [HttpGet]
         [ActionName("Sign")]
-        //[Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Sign([FromQuery]string message)
         {
             var byteConverter = new ASCIIEncoding();

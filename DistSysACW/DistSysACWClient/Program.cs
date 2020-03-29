@@ -57,8 +57,8 @@ namespace DistSysACWClient
     class Client
     {
 
-        private static string userName = "";
-        private static string apiKey = "";
+        private static string userName = "UserOne";
+        private static string apiKey = "473605da-a6ce-420c-8d63-f44403621159";
         private static string publicKey = "";
         private static string getQuery = "", postQuery = "";
         private static object postObject;
@@ -210,19 +210,15 @@ namespace DistSysACWClient
                                         getQuery += param.Name + "=" + fixedItem + "&";
                                     }
                                 }
-                                else if (param.From == "[Body]" && param.Type == "DistSysACW.Models.User")
+                                else if (param.From == "[Body]" && param.Type == "System.Collections.Generic.Dictionary`2[System.String,System.String]")
                                 {
                                     var uName = input.Split(' ')[0];
                                     var role = input.Split(' ')[1];
 
-                                    var user = new DistSysACW.Models.User()
-                                    {
-                                        UserName = uName,
-                                        Role = User.Roles.User
-                                    };
+                                    var dic = new Dictionary<string, string> {{"username", uName}, {"role", role}};
 
                                     //Convert to an object so we can serialize generally
-                                    postObject = user;
+                                    postObject = dic;
                                 }
                                 else
                                 {
@@ -336,8 +332,8 @@ namespace DistSysACWClient
             }
             Environment.Exit(0);
         }
-        
-        public static byte[] StringToByteArray(string hex)
+
+        private static byte[] StringToByteArray(string hex)
         {
             var NumberChars = hex.Length;
             var bytes = new byte[NumberChars / 2];

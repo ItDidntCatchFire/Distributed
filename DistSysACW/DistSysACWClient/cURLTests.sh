@@ -203,7 +203,7 @@ printf "\e[31m\tAdding [SPACE] as username\n\e[m"
 # fi;
 
 printf "Task 7 \n"
-printf "\tDeleting a user unauthorized\n"
+printf "\tDeleting a user (Unauthorized)\n"
 if [[ $(curl -s -k -o temp.txt -X DELETE -w '%{http_code}' ${host}user/RemoveUser?username=UserOne -H 'ApiKey: '$UserOneAPIKey'h') == 401 ]]
 then 
 	var=$(<temp.txt)
@@ -294,7 +294,35 @@ else
 	kill -1 $$
 fi;
 
-printf "\tChanging non-existant (UserZero) to User\n"
+printf "\tChanging UserTwo to User (Unauthorized)\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey'h' -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "User"}') == 401 ]]
+then 
+    var=$(<temp.txt)
+    if [[ "\"Unauthorized. Admin access only."\" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tChanging UserTwo to Admin (Unauthorized)\n"
+if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey'h' -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "Admin"}') == 401 ]]
+then 
+    var=$(<temp.txt)
+    if [[ "\"Unauthorized. Admin access only."\" != $var ]]
+    then
+        printf "Failed \n"
+        kill -1 $$
+    fi;    
+else
+    printf "  http code Fail\n"
+	kill -1 $$
+fi;
+
+printf "\tChanging non-existent (UserZero) to User\n"
 if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserZero","role": "User"}') == 400 ]]
 then 
 	var=$(<temp.txt)
@@ -323,7 +351,7 @@ else
 fi;
 
 printf "\e[31m\tChanging role non JSON\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d 'HELLO') == 400 ]]
+# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d 'HELLO') == 400 ]]
 # then 
 # 	var=$(<temp.txt)
 # 	if [[ "NOT DONE: An error occured" != $var ]]
@@ -336,19 +364,19 @@ printf "\e[31m\tChanging role non JSON\n\e[m"
 # 	kill -1 $$
 # fi;
 
-printf "\e[31m\tChanging role to King\n\e[m"
-# if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$APIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "King"}') == 400 ]]
-# then 
-# 	var=$(<temp.txt)
-# 	if [[ "NOT DONE: Role does not exist" != $var ]]
-# 	then
-#         printf "Failed \n"
-# 		kill -1 $$
-#     fi;  
-# else
-#     printf "  http code Fail\n"
-# 	kill -1 $$
-# fi;
+printf "\tChanging role to King\n"
+ if [[ $(curl -s -k -o temp.txt -X POST -w '%{http_code}' ${host}user/ChangeRole -H 'ApiKey: '$UserOneAPIKey -H 'Content-Type: application/json' -d '{"username": "UserTwo","role": "King"}') == 400 ]]
+ then 
+    var=$(<temp.txt)
+ 	if [[ "NOT DONE: Role does not exist" != $var ]]
+ 	then
+         printf "Failed \n"
+ 		kill -1 $$
+    fi;  
+    else
+        printf "  http code Fail\n"
+        kill -1 $$
+fi;
 
 
 printf "Task 9 \n"
@@ -380,7 +408,7 @@ else
 	kill -1 $$
 fi;
 
-printf "\tProtected Hello unauthorized\n"
+printf "\tProtected Hello (Unauthorized)\n"
 if [[ $(curl -s -k -o temp.txt -w '%{http_code}' ${host}protected/hello -H 'ApiKey: '$UserOneAPIKey'h') == 401 ]]
 then 
 	var=$(<temp.txt)
