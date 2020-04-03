@@ -1,0 +1,3 @@
+[submodule "DistSysACW/DistributedTests"]
+	path = DistSysACW/DistributedTests
+	url = https://github.com/ItDidntCatchFire/DistributedTests.git

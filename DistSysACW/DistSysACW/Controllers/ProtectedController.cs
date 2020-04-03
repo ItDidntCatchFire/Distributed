@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -53,9 +55,7 @@ namespace DistSysACW.Controllers
         [ActionName("GetPublicKey")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetPublicKey()
-        {
-            return Ok(_cspAsymmetric.ToXmlStringCore22());
-        }
+            => Ok(_cspAsymmetric.ToXmlStringCore22());
 
         [HttpGet]
         [ActionName("Sign")]
@@ -69,5 +69,22 @@ namespace DistSysACW.Controllers
             
             return Ok(BitConverter.ToString(result));
         }
+        
+        [HttpGet]
+        [ActionName("AddFifty")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddFify(string encryptedInteger, string encryptedSymKey, string encryptedIV)
+        {
+            return Ok();
+        }
+       
+       private static byte[] StringToByteArray(string hex)
+       {
+           var NumberChars = hex.Length;
+           var bytes = new byte[NumberChars / 2];
+           for (var i = 0; i < NumberChars; i += 2)
+               bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+           return bytes;
+       }
     }
 }

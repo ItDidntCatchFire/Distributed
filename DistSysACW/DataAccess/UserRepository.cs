@@ -69,6 +69,7 @@ namespace DistSysACW.DataAccess
 
         public async Task DeleteAsync(User type)
         {
+            
             foreach (var log in type.Logs)
             {
                 var logArchive = new Log_Archives()

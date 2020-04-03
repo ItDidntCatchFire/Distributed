@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -82,7 +83,10 @@ namespace DistSysACWClient
             const string authAttribute = "Microsoft.AspNetCore.Authorization.AuthorizeAttribute";
 
             var endpoints = new List<Api>();
-            var name = AssemblyName.GetAssemblyName(@".\DistSysACW.dll");
+            
+            // Find DistSysACW.dll this is needed as the project in run from different places depending if the test script is running it or not
+            var file = Directory.GetFiles(Directory.GetCurrentDirectory(),"DistSysACW.dll", SearchOption.AllDirectories).First();
+            var name = AssemblyName.GetAssemblyName(file); //@".\DistSysACW.dll" should just be that if it does not work
 
             foreach (var myClass in Assembly.Load(name).GetTypes()
                 .Where(t => String.Equals(t.Namespace, "DistSysACW.Controllers", StringComparison.Ordinal))
@@ -172,6 +176,11 @@ namespace DistSysACWClient
                         && (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
                             .FirstOrDefault(x => x.Action.ToUpper().ToString() == "GETPUBLICKEY")) != null
                         ||
+                        
+                        // (input.Split(' ')[0].ToUpper() == "PROTECTED" && input.Split(' ')[1].ToUpper() == "ADDFIFTY")
+                        // && (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
+                        //     .FirstOrDefault(x => x.Action.ToUpper().ToString() == "GETPUBLICKEY")) != null
+                        // ||
                             //SEARCH the reflected API
                         (api = apis.Where(x => x.Controller.ToUpper().ToString() == input.Split(' ')[0].ToUpper())
                             .FirstOrDefault(x => x.Action.ToUpper().ToString() == input.Split(' ')[1].ToUpper())) != null
@@ -210,7 +219,7 @@ namespace DistSysACWClient
                                         getQuery += param.Name + "=" + fixedItem + "&";
                                     }
                                 }
-                                else if (param.From == "[Body]" && param.Type == "System.Collections.Generic.Dictionary`2[System.String,System.String]")
+                                else if (param.From == "[Body]" && param.Type == "Newtonsoft.Json.Linq.JObject")
                                 {
                                     var uName = input.Split(' ')[0];
                                     var role = input.Split(' ')[1];
@@ -222,9 +231,13 @@ namespace DistSysACWClient
                                 }
                                 else
                                 {
-                                    //delete breaks
                                     var item = input.Split(' ')[0];
-                                    if (param.From == "[Query]" && !String.IsNullOrEmpty(item))
+                                    //delete breaks
+                                    if (api.Http == "[Delete]")
+                                    {
+                                        getQuery += param.Name + "=";
+                                    }
+                                    else if (param.From == "[Query]" && !String.IsNullOrEmpty(item))
                                     {
                                         input = input.Replace(item, " ");
                                         getQuery += param.Name + "=" + item + "&";
@@ -281,8 +294,8 @@ namespace DistSysACWClient
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
-                        Console.ReadLine();
                     }
+                    
                     if (api != null)
                         if (isSuccess && api.Controller == "User" && api.Http == "[Post]" && api.Action == "new")
                         {

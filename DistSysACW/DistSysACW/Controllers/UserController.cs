@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DistSysACW.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Crypto.Tls;
 
 namespace DistSysACW.Controllers
 {
@@ -43,12 +45,12 @@ namespace DistSysACW.Controllers
 
             if (String.IsNullOrEmpty(userName))
                 return BadRequest(
-                    "\"Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json\"");
+                    "Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
 
             if (user.Result)
                 //return Forbid("Oops. This username is already in use. Please try again with a new username.");
                 return StatusCode(403,
-                    "\"Oops. This username is already in use. Please try again with a new username.\"");
+                    "Oops. This username is already in use. Please try again with a new username.");
 
             var newUser = await _userRepository.NewUserAsync(userName);
             await _userRepository.SaveAsync();
@@ -68,15 +70,24 @@ namespace DistSysACW.Controllers
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> RemoveUser([FromQuery] string userName)
         {
+            var tUser =  _userRepository.GetByUsernameAsync(userName); 
             if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
             {
-                var user = await _userRepository.GetByUsernameAsync(userName); 
-                if (user != null)
+                try
                 {
-                    await _userRepository.DeleteAsync(user);
+                    var user = await tUser;
+                    if (user != null && user.ApiKey == apiKey)
+                    {
+                        await _userRepository.DeleteAsync(user);
 
-                    _ = _userRepository.SaveAsync();
-                    return Ok(true);
+                        await _userRepository.SaveAsync();
+                        return Ok(true);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
                 }
             }
 
@@ -86,20 +97,20 @@ namespace DistSysACW.Controllers
         [HttpPost]
         [ActionName("ChangeRole")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangeRole([FromBody] Dictionary<string, string> dic)
+        public async Task<IActionResult> ChangeRole([FromBody] JObject json)
         {
             try
             {
-                if (!dic.TryGetValue("username", out var username) || !dic.TryGetValue("role", out var role))
+                if (!json.TryGetValue("username", out var username) || !json.TryGetValue("role", out var role))
                     return BadRequest("NOT DONE: An error occured");
                 
-                var tUser = _userRepository.GetByUsernameAsync(username);
+                var tUser = _userRepository.GetByUsernameAsync(username.ToString());
 
-                if (!await _userRepository.UserExistsByUserNameAsync(username))
+                if (!await _userRepository.UserExistsByUserNameAsync(username.ToString()))
                     return BadRequest("NOT DONE: Username does not exist");
 
                 
-                if (!Enum.IsDefined(typeof(Models.User.Roles), role))
+                if (!Enum.IsDefined(typeof(Models.User.Roles), role.ToString()))
                     return BadRequest("NOT DONE: Role does not exist");
 
                 var user = await tUser;
@@ -108,7 +119,7 @@ namespace DistSysACW.Controllers
                 {
                     ApiKey = user.ApiKey,
                     UserName = user.UserName,
-                    eRole = (Models.User.Roles)Enum.Parse(typeof(Models.User.Roles), role)
+                    eRole = (Models.User.Roles)Enum.Parse(typeof(Models.User.Roles), role.ToString())
                 };
 
                 await _userRepository.UpdateAsync(updateUser);
@@ -130,7 +141,7 @@ namespace DistSysACW.Controllers
         {
             if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
             {
-                var user = await _userRepository.GetByIdAsync((apiKey));
+                var user = await _userRepository.GetByIdAsync(apiKey);
                 return Ok("Hello " + user.UserName);
             }
             else

@@ -44,6 +44,7 @@ namespace DistSysACW
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseMiddleware<Middleware.AuthMiddleware>();
+            app.UseMiddleware<Middleware.LoggingMiddleware>();
 
             if (env.IsDevelopment())
             {

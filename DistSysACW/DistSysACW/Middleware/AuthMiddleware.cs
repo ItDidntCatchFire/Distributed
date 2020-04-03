@@ -37,15 +37,6 @@ namespace DistSysACW.Middleware
                     cli.AddClaims(claims);
 
                     context.User.AddIdentity(cli);
-
-                    //Logging
-                    var request = context.Request.Path;
-                    var log = new Log($"User Requested: {request}");
-                    if (user.Logs == null)
-                        user.Logs = new List<Log>();
-                    user.Logs.Add(log);
-                    await userRepository.UpdateAsync(user);
-                    _ = userRepository.SaveAsync();
                 }
             }
             #endregion
