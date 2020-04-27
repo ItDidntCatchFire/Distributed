@@ -20,8 +20,8 @@ namespace DistSysACW.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL("server=localhost;database=Dan;user=root;password=password;");
-            //optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=DistSysACW;MultipleActiveResultSets=true;");
+            //optionsBuilder.UseMySQL("server=localhost;database=Dan;user=root;password=password;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=DistSysACW;MultipleActiveResultSets=true;");
         }
     }
 }
