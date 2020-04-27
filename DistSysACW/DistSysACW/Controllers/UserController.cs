@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DistSysACW.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace DistSysACW.Controllers
 {
@@ -43,12 +42,12 @@ namespace DistSysACW.Controllers
 
             if (String.IsNullOrEmpty(userName))
                 return BadRequest(
-                    "\"Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json\"");
+                    "Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
 
             if (user.Result)
                 //return Forbid("Oops. This username is already in use. Please try again with a new username.");
                 return StatusCode(403,
-                    "\"Oops. This username is already in use. Please try again with a new username.\"");
+                    "Oops. This username is already in use. Please try again with a new username.");
 
             var newUser = await _userRepository.NewUserAsync(userName);
             await _userRepository.SaveAsync();
@@ -127,17 +126,6 @@ namespace DistSysACW.Controllers
         [ActionName("hello")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Hello()
-        {
-            if (HttpContext.Request.Headers.TryGetValue("ApiKey", out var apiKey))
-            {
-                var user = await _userRepository.GetByIdAsync((apiKey));
-                return Ok("Hello " + user.UserName);
-            }
-            else
-            {
-                //This should never be hit as we will have an ApiKey that works
-                return BadRequest();
-            }
-        }
+            => Ok("Hello " + HttpContext.User.FindFirst(ClaimTypes.Name).Value);
     }
 }

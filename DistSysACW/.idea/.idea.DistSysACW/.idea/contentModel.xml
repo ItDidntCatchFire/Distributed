@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/resharper-host/local/Transient/ReSharperHost/v201/SolutionCaches/_DistSysACW.540264385.00" t="ExcludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/consoles/db" t="IncludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/extensions" t="IncludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/scratches" t="IncludeRecursive" />
-    <e p="$USER_HOME$/.Rider2019.3/system/extResources" t="IncludeRecursive" />
-    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_DistSysACW.540264385.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="Data" t="IncludeRecursive">
         <e p="Data.csproj" t="IncludeRecursive" />
@@ -30,8 +30,7 @@
       </e>
       <e p="DataAccess" t="IncludeRecursive">
         <e p="DatabaseAccess.csproj" t="IncludeRecursive" />
-        <e p="LogDatabaseAccess.cs" t="Include" />
-        <e p="UserDatabaseAccess.cs" t="Include" />
+        <e p="UserRepository.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
@@ -66,6 +65,8 @@
         <e p="appsettings.Development.json" t="Include" />
         <e p="appsettings.json" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
+        <e p="mono_crash.mem.2950.1.blob" t="Include" />
+        <e p="mono_crash.mem.9383.1.blob" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.2" t="Include">
@@ -90,7 +91,6 @@
           </e>
         </e>
         <e p="runMe.sh" t="Include" />
-        <e p="temp.txt" t="Include" />
       </e>
       <e p="Models" t="IncludeRecursive">
         <e p="BaseLog.cs" t="Include" />

@@ -27,7 +27,7 @@ namespace DistSysACW.Controllers
             if (string.IsNullOrEmpty(message))
                 return BadRequest("Bad Request");
             
-            byte[] data = Encoding.ASCII.GetBytes(message);
+            var data = Encoding.ASCII.GetBytes(message);
             var sha = new SHA1CryptoServiceProvider();
             var result = sha.ComputeHash(data);
             
@@ -42,7 +42,7 @@ namespace DistSysACW.Controllers
             if (string.IsNullOrEmpty(message))
                 return BadRequest("Bad Request");
             
-            byte[] data = Encoding.ASCII.GetBytes(message);
+            var data = Encoding.ASCII.GetBytes(message);
             var sha = new SHA256CryptoServiceProvider();
             var result = sha.ComputeHash(data);
             
@@ -53,11 +53,9 @@ namespace DistSysACW.Controllers
         [ActionName("GetPublicKey")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetPublicKey()
-        {
-            return Ok(_cspAsymmetric.ToXmlStringCore22());
-        }
+            => Ok(_cspAsymmetric.ToXmlStringCore22());
 
-        [HttpGet]
+            [HttpGet]
         [ActionName("Sign")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Sign([FromQuery]string message)
